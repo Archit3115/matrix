@@ -355,7 +355,8 @@ flowchart LR
 3. Run `python tests/smoke.py`. If you touched `matrix/viz/` or `viz.py`, also run `python tests/selftest.py`.
 4. Add or adjust tests: a self-test for UI behaviour, or a smoke-corpus file for a new extractor.
 5. Update the docs in `docs/` if you changed a flag, key, route, control or limit. These docs are written from the
-   code, so keep them in step with it.
+   code, so keep them in step with it. Every CLI flag, hook and output is also catalogued in
+   [FOR-AGENTS.md](FOR-AGENTS.md#what-matrix-gives-an-agent-out-of-the-box).
 6. Open a pull request. CI must pass, and the maintainer reviews and squash-merges every change.
 
 See [CONTRIBUTING.md](../CONTRIBUTING.md), [CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md), and

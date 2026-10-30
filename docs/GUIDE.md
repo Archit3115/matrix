@@ -181,6 +181,9 @@ Narrow the roots, add ignores, raise or remove the cap, or pass `--force`.
 Matrix integrates with Claude Code through four files in the target folder. Every one of them is safe to rerun
 setup over.
 
+For why the integration is shaped this way, how an agent should treat each provenance tier, and how to use Matrix
+with agents other than Claude Code, see [FOR-AGENTS.md](FOR-AGENTS.md).
+
 ### Hooks (`.claude/settings.json`)
 
 Setup adds or updates exactly these two entries. Any other hooks in the file are left untouched.
