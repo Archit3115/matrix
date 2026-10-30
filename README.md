@@ -368,8 +368,8 @@ Read more in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 - **`max_files` (default 60,000).** A build from scratch refuses roots that hold more files than this. Raise the cap
   in the config, set it to `0` to remove it, or pass `--force` ("Index anyway" in the UI). An existing graph is
   updated incrementally regardless.
-- **Large graphs make a large page.** `viz.py` warns when `graph.html` passes 3.8 MB. The embedded universe hierarchy
-  has a hard 120 kB budget.
+- **Large graphs make a large page.** `viz.py` warns when `graph.html` passes 3.8 MB. It also warns when the embedded
+  universe hierarchy passes 120 kB.
 - **One machine, one user.** The engine serves only `127.0.0.1`. There is no multi-user or remote mode, by design.
 - **`graph.html` lists your universes.** For the Multiverse switcher, each page embeds every registered universe's
   name, root folder and install and interpreter paths. Set `"embed_scopes": false` before you share a page.

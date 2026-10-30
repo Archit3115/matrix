@@ -191,7 +191,7 @@ flowchart LR
 | Engine stop wait | 15 s | `matrix.py` | Then it tells you to end the process yourself. |
 | Liveness probe | 3 s | `matrix.py` | A record that does not answer is stale. |
 | Hook timeouts | SessionStart 30 s, Stop 180 s | `settings.json` | Enforced by Claude Code. |
-| Universe payload | 120,000 bytes | `viz.py` | A hard assert. |
+| Universe payload | 120,000 bytes | `viz.py` | Printed to stderr. |
 | Page size warning | 3.8 MB | `viz.py` | Printed to stderr. |
 | Search index swap | 3 tries, 0.2 s apart | `search.py` | Keeps the old file, which readers see as stale. |
 | Self-test timeout | 5 s per test (some 10 to 12 s) | `state.js` | The test fails with `timeout`. |

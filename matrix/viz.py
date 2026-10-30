@@ -281,8 +281,9 @@ def main(argv=()):
     payload = build_payload(data, cfg)
     payload["stats"] = build_stats(data, cfg, out_dir)
     payload["universe"] = build_universe(data)
-    assert len(json.dumps(payload["universe"], separators=(",", ":"))) <= 120_000, \
-        "payload.universe > 120,000 B"
+    usize = len(json.dumps(payload["universe"], separators=(",", ":")))
+    if usize > 120_000:   # universe hierarchy budget
+        print(f"warning: payload.universe is {usize} bytes (> 120,000 B)", file=sys.stderr)
     blob = json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
     blob = blob.replace("<", "\\u003c").replace("\u2028", "\\u2028") \
                .replace("\u2029", "\\u2029")
