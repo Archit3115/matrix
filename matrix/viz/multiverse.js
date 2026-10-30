@@ -132,7 +132,8 @@
 
   // ---- view state --------------------------------------------------------------------------------------------------
   let opener = null, pollTimer = 0, pollSeq = 0;
-  const ui = {renaming: null, removing: null, add: null, browse: null, job: null, err: ""};
+  const ui = {renaming: null, removing: null, add: null, browse: null, job: null, err: "", combine: null};
+  // ui.combine: null, or the ids ticked for a combined page (server mode only)
   // ui.add: {root, name, pre: null|{scope, existing, preflight}, busy}; ui.browse: {path, parent, dirs, hidden}
   // ui.job: {id, scope, name, state, phase, progress, log, next, open, t0, over, force, logOpen, logWhen, kind}
   //   kind "log": a persisted last_build.log shown in the same panel (no job running)
@@ -157,7 +158,12 @@
         "' aria-label='New name for " + e(sc.name || sc.id) + "' spellcheck='false'>";
     }
     let tail;
-    if (ui.removing === sc.id) {
+    if (ui.combine) {
+      const on = ui.combine.includes(sc.id), can = srv && !page && sc.built;
+      tail = "<label class='mv-sel" + (can ? "" : " is-off") + "'><input type='checkbox' data-act='sel' data-id='" + e(sc.id) + "'" +
+        (on ? " checked" : "") + (can ? "" : " disabled") + " aria-label='Combine " + e(sc.name || sc.id) + "'>" +
+        (can ? "Combine" : "Not built") + "</label>";
+    } else if (ui.removing === sc.id) {
       tail = "<span class='mv-confirm' role='group' aria-label='Confirm remove'><span class='mv-cq'>" +
         (sc.kind === "home" ? "Unregister only, files untouched." : "Deletes its index; the folder is untouched.") +
         "</span><button type='button' class='btn-quiet mv-danger' data-act='remove-yes' data-id='" + e(sc.id) + "'>Remove</button>" +
@@ -329,8 +335,14 @@
       "<div class='mv-cmd'><code id='mv-cmd'>" + e(command(d)) + "</code>" +
       "<button type='button' class='btn-quiet' data-act='copy'>Copy</button></div>" +
       "<p class='mv-note'>Run it in a terminal; it opens this page served from 127.0.0.1 with the actions enabled.</p></div>";
-    const actRow = "<div class='mv-tools'>" + (ui.add ? "" :
+    const nb = list.filter(sc => sc.built && sc.id !== PAGE).length, nc = ui.combine ? ui.combine.length : 0;
+    const actRow = ui.combine ? "<div class='mv-tools'>" +
+      "<button type='button' data-act='combine-go'" + (nc < 2 ? " disabled" : "") + ">Open combined (" + nc + ")</button>" +
+      "<button type='button' class='btn-quiet' data-act='combine-x'>Cancel</button></div>" +
+      "<p class='mv-note'>Tick two or more universes. Names they share are linked; related universes sit together, unrelated ones drift apart.</p>"
+      : "<div class='mv-tools'>" + (ui.add ? "" :
       "<button type='button' data-act='add'" + (srv ? "" : " disabled title='Needs the engine'") + ">Add universe</button>") +
+      (srv && !ui.add ? "<button type='button' data-act='combine'" + (nb < 2 ? " disabled title='Needs two built universes'" : "") + ">Combine</button>" : "") +
       (srv ? "<button type='button' class='btn-quiet' data-act='refresh'>Refresh</button>" : "") + "</div>";
     const focusKey = document.activeElement && root.contains(document.activeElement) ? focusSig(document.activeElement) : null;
     let sh = root.querySelector(".mv-sheet");
@@ -399,7 +411,7 @@
     root.hidden = true; root.innerHTML = "";
     document.body.classList.remove("mv-open");
     stopPoll();
-    Object.assign(ui, {renaming: null, removing: null, add: null, browse: null, err: ""});
+    Object.assign(ui, {renaming: null, removing: null, add: null, browse: null, err: "", combine: null});
     if (ui.job && !/queued|running/.test(ui.job.state)) ui.job = null;
     const b = $("mv-btn"); if (b) b.setAttribute("aria-expanded", "false");
     const t = opener && opener.isConnected && opener !== document.body ? opener : b;
@@ -426,6 +438,11 @@
     if (id === d.current) { close(); return; }
     if (server() && (!sc.built || sc.stale === true)) build(sc, true);
     else go(sc);
+  }
+  function toggleSel(id) {
+    const k = ui.combine.indexOf(id);
+    if (k < 0) ui.combine.push(id); else ui.combine.splice(k, 1);
+    render();
   }
   function stopPoll() { clearTimeout(pollTimer); pollTimer = 0; pollSeq++; }
   async function build(sc, thenOpen, force) {
@@ -603,7 +620,12 @@
     switch (act) {
       case "close": close(); break;
       case "err-x": setErr(""); { const f = focusables()[0]; if (f) f.focus(); } break;
-      case "pick": pick(id); break;
+      case "pick": if (ui.combine) { if (sc && sc.built && id !== PAGE) toggleSel(id); } else pick(id); break;
+      case "sel": toggleSel(id); break;
+      case "combine": ui.combine = []; ui.add = null; ui.browse = null; ui.renaming = ui.removing = null; render(); break;
+      case "combine-x": ui.combine = null; render(); { const b = $("mv").querySelector("[data-act='combine']"); if (b) b.focus(); } break;
+      case "combine-go": if (ui.combine && ui.combine.length > 1 && server())
+        M._nav((server().base || "") + "/c/" + ui.combine.map(encodeURIComponent).join(",") + "/"); break;
       case "rebuild": if (sc) build(sc, false); break;
       case "rename": ui.renaming = id; ui.removing = null; render(); { const i = $("mv").querySelector(".mv-rename"); if (i) { i.focus(); i.select(); } } break;
       case "remove": ui.removing = id; ui.renaming = null; render(); { const k = $("mv").querySelector("[data-act='remove-no']"); if (k) k.focus(); } break;

@@ -67,7 +67,7 @@ def build_payload(data, cfg=None):
         comm_idx.get(n.get("community"), -1),
         n.get("file") or "",
         n.get("line") or 0,
-        GROUP_OF.get(n["type"], OTHER),
+        n.get("group", GROUP_OF.get(n["type"], OTHER)),   # combine.py sets group per universe
         n["id"],
     ] for n in nodes]
 
@@ -126,7 +126,7 @@ def build_universe(data):
         adj[a][b] += 1
         adj[b][a] += 1
     deg = [len(x) for x in adj]
-    cl = [GROUP_OF.get(x["type"], OTHER) for x in nodes]
+    cl = [x.get("group", GROUP_OF.get(x["type"], OTHER)) for x in nodes]
     gal = {}
     for i, x in enumerate(nodes):
         gal.setdefault((cl[i], x["type"]), []).append(i)
@@ -271,6 +271,17 @@ def assemble(blob, title="Matrix", pre_js=""):
 
 
 
+def page_html(payload, title="Matrix", pre_js=""):
+    """The whole page for a payload (universe budget warned, payload escaped)."""
+    usize = len(json.dumps(payload["universe"], separators=(",", ":")))
+    if usize > 120_000:   # universe hierarchy budget
+        print(f"warning: payload.universe is {usize} bytes (> 120,000 B)", file=sys.stderr)
+    blob = json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
+    blob = blob.replace("<", "\\u003c").replace("\u2028", "\\u2028") \
+               .replace("\u2029", "\\u2029")
+    return assemble(blob, title, pre_js)
+
+
 def main(argv=()):
     ap = argparse.ArgumentParser(description="Render graph.html from graph.json.")
     ap.add_argument("--config", help="config file (default: <install>/config.json)")
@@ -281,13 +292,7 @@ def main(argv=()):
     payload = build_payload(data, cfg)
     payload["stats"] = build_stats(data, cfg, out_dir)
     payload["universe"] = build_universe(data)
-    usize = len(json.dumps(payload["universe"], separators=(",", ":")))
-    if usize > 120_000:   # universe hierarchy budget
-        print(f"warning: payload.universe is {usize} bytes (> 120,000 B)", file=sys.stderr)
-    blob = json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
-    blob = blob.replace("<", "\\u003c").replace("\u2028", "\\u2028") \
-               .replace("\u2029", "\\u2029")
-    html = assemble(blob, cfg["title"], scopes_script(out_dir))
+    html = page_html(payload, cfg["title"], scopes_script(out_dir))
     path = args.out or os.path.join(out_dir, "graph.html")
     with open(path, "w", encoding="utf-8", newline="\n") as fh:
         fh.write(html)

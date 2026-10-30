@@ -58,6 +58,7 @@ Every page lives under the per-run secret path `/s/<key>/`.
 | `/new` | The landing page: a list of universes, the **New universe** form with its folder browser, and build progress. |
 | `/u/<id>` | `301` to `/u/<id>/` |
 | `/u/<id>/` or `/u/<id>/graph.html` | That universe's `graph.html`, with `window.MX_SERVER = {token, base, current}` and a fresh `MX_SCOPES` (including `building` flags) injected before `</head>`. If it is not built yet, a `404` page offering **Build**. |
+| `/c/<id>,<id>[,...]/` | Two or more built universes on one page (`combine.py`): each universe is a top-level cluster, names they share (modules, classes, functions, tables, views, datasets, pipelines, URLs) are joined by `SHARED` edges tagged `INFERRED`, and related universes are seated together, unrelated ones apart. `404` if one is unknown or not built, or the graphs together pass 300 MB. |
 | `/u/<id>/<file>` | A file inside that universe's `out/`, such as `GRAPH_REPORT.md` or `wiki/orders.md`. `.md` and `.log` files are served as `text/plain`. |
 
 | Path without the key | Response |

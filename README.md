@@ -145,7 +145,7 @@ navigate it as you would a map: fly in, drill down, climb back out.
 | ![Light theme](docs/screenshots/04-light-theme.png) | ![The dashboard Overview tab](docs/screenshots/05-dashboard.png) |
 | **Light and dark** themes, both in the monochrome hairline style with only faint colour. | **Dashboard tabs:** Overview, Claims, Communities and Tables. They follow the same filters as the graph. |
 | ![The Multiverse window listing several universes](docs/screenshots/06-multiverse.png) | ![A universe building with live progress and log](docs/screenshots/07-multiverse-build.png) |
-| **Multiverse** (`u`) lists every folder you have indexed and switches between them. | **Builds** run as jobs on the local engine, with a progress bar, a live log and a Stop button. |
+| **Multiverse** (`u`) lists every folder you have indexed and switches between them. **Combine** opens two or more of them as one universe: shared names link them, related universes sit together and unrelated ones drift apart. | **Builds** run as jobs on the local engine, with a progress bar, a live log and a Stop button. |
 | ![The engine landing page with the New universe form](docs/screenshots/08b-new-universe.png) | ![Search results in the sidebar](docs/screenshots/09-search.png) |
 | **Landing page:** browse to a folder, preflight-count it, then index it. | **Search** (`/`) runs a ranked, camel-case-aware search over labels, paths and doc text. |
 

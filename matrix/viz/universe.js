@@ -13,6 +13,8 @@
   const C = {
     LIFT: 1.25, GAP_SUN: 3, GAP_SUN_K: 1, GAP_RING: 6, GAP_SYS: 8, GAP_SYS_K: 0.3, DUST_CLEAR: 6, GAP_DUST: 3,
     DUST_W: 10, DUST_BANDS_BETWEEN: 1, GAL_K: 3.2, CL_K: 0.55,
+    // combined pages: relatedness of two clusters = 1 - exp(-shared names / CL_LINK); an unrelated pair keeps CL_APART x more clearance
+    CL_APART: 1.5, CL_LINK: 20,
     SPIRAL_MIN: 400, PITCH: 0.32, ARM_KAPPA: 2.6, ARM_FLOOR: 0.03, SYS_ARM_KAPPA: 1.6,
     FILL_SYS: 0.3, FILL_RING: 0.7, FILL_DUST: 0.5, FILL_GAL: 0.9, SOLO_RING_MAX: 8, DUST_H_SPIRAL: 0.55, DUST_H_ELL: 0.3,
     F_DM: 6, NFW_C: 4, F_DM_CL: 8, CORO: 0.7, P_RING: 30, P_GAL: 600, P_CL: 3600,
@@ -269,7 +271,9 @@
       }
       const lr = clLanes[refC][clLanes[refC].length - 1], tauCl = lr && lr.r > 0 ? TAU * lr.r / (C.P_CL * clVraw[refC]) : 0;
       for (c = 0; c < nC; c++) for (const L of clLanes[c]) { const w = L.r > 0 ? tauCl * clVraw[c] / L.r : 0; for (const k of L.idx) gW[k] = w; }
-      // cluster seats, then contraction + hard minimum separation
+      // cluster seats, then contraction + hard minimum separation (wider for unrelated clusters on combined pages)
+      const link = sample.link, ck = c => (ckey ? ckey[c] : c);
+      const apart = (p1, p2) => link ? 1 + C.CL_APART * Math.exp(-((link[ck(p1)] || [])[ck(p2)] || 0) / C.CL_LINK) : 1;
       const ord = [];
       let tot = 0;
       for (c = 0; c < nC; c++) { ord.push(c); tot += cRad[c]; }
@@ -284,7 +288,7 @@
         for (let pass = 0; pass < 40; pass++) {
           let bad = false;
           for (let p1 = 0; p1 < nC; p1++) for (let p2 = p1 + 1; p2 < nC; p2++) {
-            const dx = cX[p2] - cX[p1], dy = cY[p2] - cY[p1], d = Math.hypot(dx, dy) || 1e-6, need = (cRad[p1] + cRad[p2]) * (1 + sp * C.CL_K);
+            const dx = cX[p2] - cX[p1], dy = cY[p2] - cY[p1], d = Math.hypot(dx, dy) || 1e-6, need = (cRad[p1] + cRad[p2]) * (1 + sp * C.CL_K) * apart(p1, p2);
             if (d < need) {
               bad = true;
               const push = (need - d) * 1.0001, wa = cRad[p2] / (cRad[p1] + cRad[p2]);
@@ -574,7 +578,8 @@
     const sample = {n, clusters: cl.map(c => CL[c]), galaxies: gl.map(k => [CL[galaxies[k].cluster], galaxies[k].type]),
       galaxyKey: Int32Array.from(gl), degree: new Float32Array(n), radius: new Float32Array(n), system: new Int32Array(n),
       galaxy: new Int32Array(n), sun: new Uint8Array(n), systemSun: Int32Array.from(sl, s => li[sunOf[s]]),
-      key: Int32Array.from(gi), systemKey: Int32Array.from(sl), clusterKey: Int32Array.from(cl)};
+      key: Int32Array.from(gi), systemKey: Int32Array.from(sl), clusterKey: Int32Array.from(cl),
+      link: PU && Array.isArray(PU.link) ? PU.link : null};
     const vis = new Uint8Array(n);
     for (let k = 0; k < n; k++) {
       const i = gi[k];
@@ -795,7 +800,7 @@
   MX.selftest.add("universe.parents", async () => {
     if (!PU) fail("payload.universe missing");
     need(); await settled();
-    if (CL.join() !== (D.groups || []).join() || CL.length !== 4) fail("clusters != payload.groups");
+    if (CL.join() !== (D.groups || []).join() || (!(PU && PU.link) && CL.length !== 4)) fail("clusters != payload.groups");
     for (let k = 1; k < nGal; k++) { const a = galaxies[k - 1], b = galaxies[k]; if (!(a.cluster < b.cluster || (a.cluster === b.cluster && a.type < b.type))) fail("galaxy order at " + k); }
     for (let i = 0; i < N; i++) {
       if (U.systemOf(i) !== PU.sys[i]) fail("system of " + g.id[i]);
