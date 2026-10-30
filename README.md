@@ -65,6 +65,39 @@ flowchart LR
 
 ---
 
+## Built for LLMs and agents
+
+Matrix exists so that a coding agent spends its context on the task, not on finding its way around.
+
+- **Query first, read last.** One `query.py` call answers *where is X*, *what touches Y* or *how does A reach B*,
+  with a `file:line` pointer on every line. The agent opens only the lines it will change.
+- **Provenance on every edge.** `EXTRACTED`, `INFERRED` or `AMBIGUOUS` tells the agent what it can act on and what
+  it must verify first.
+- **Small by design.** Capped lists (`-l`, default 20), one line per node, `... N more` when cut, and `--json` for
+  machines. On this repository, `explain build_db` prints about 450 bytes; learning the same callers by reading
+  means opening three files, about 71 KB.
+- **Pre-digested areas.** `INDEX.md` and one wiki article per community, which the indexer heads with *"Read the
+  article, not the source files."*
+- **Starts every session oriented.** A `SessionStart` hook injects a brief of about 15 lines; a `Stop` hook rebuilds
+  only what changed, so the next turn sees fresh structure.
+- **Instructions as code.** A marker-delimited `CLAUDE.md` block and a `/matrix` skill, written idempotently and
+  backed up, with every path filled in at install time.
+- **Deterministic and local.** Stable ids, sorted output, no model calls, no network beyond a `127.0.0.1` engine.
+- **Not tied to one agent.** It is a CLI plus Markdown and JSON, so any agent that can run a command can use it.
+
+```mermaid
+flowchart LR
+  brief["SessionStart<br/>brief"] --> query["query.py<br/>find, explain, path"]
+  query --> edit["read the lines,<br/>edit"]
+  edit --> stop["Stop hook<br/>indexer.py --if-stale"]
+  stop -->|"next turn"| query
+```
+
+Read [docs/FOR-AGENTS.md](docs/FOR-AGENTS.md) for the design, the patterns, and the full catalog of what an agent
+gets out of the box.
+
+---
+
 ## What it is, and why
 
 When an assistant or a new teammate meets an unfamiliar codebase, the first hour goes on questions like *where does
@@ -200,6 +233,19 @@ rolls back if a write fails. See [docs/GUIDE.md](docs/GUIDE.md#claude-code-integ
 
 In these tables, `MX` stands for the install folder, `<folder>/.claude/matrix`.
 
+**What you get out of the box**
+
+| Piece | What it is |
+|---|---|
+| `/matrix` | A Claude Code skill: the full command reference for the assistant. It also triggers on phrases like "where is", "what connects" and "rebuild the graph". |
+| `SessionStart` hook | Runs `session_brief.py` on startup, resume and clear (30 s timeout): a short brief of the graph and how to query it. |
+| `Stop` hook | Runs `indexer.py --if-stale --quiet` at the end of each turn (180 s timeout): an incremental rebuild when files changed. |
+| `CLAUDE.md` block | Between `<!-- matrix:begin -->` and `<!-- matrix:end -->`: query first, cite provenance. |
+| `query.py` | `find`, `explain`, `path`, `neighbors`, `stats`. |
+| `matrix` | The Multiverse launcher: `open`, `status`, `list`, `add`, `build`, `stop-build`, `stop`, `help`. |
+
+Every flag of every script is listed in [docs/FOR-AGENTS.md](docs/FOR-AGENTS.md#what-matrix-gives-an-agent-out-of-the-box).
+
 | Command | What it does |
 |---|---|
 | `python matrix/setup.py <folder> [--dry-run]` | Install or update Matrix in a folder. Safe to rerun. |
@@ -283,6 +329,7 @@ Read more in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 | Document | Contents |
 |---|---|
+| [docs/FOR-AGENTS.md](docs/FOR-AGENTS.md) | How Matrix is built for LLMs and coding agents: the agent loop, provenance, context budget, freshness, safety, use with any agent, prompt patterns, and the full out-of-the-box catalog of commands, flags, hooks and outputs. |
 | [docs/GUIDE.md](docs/GUIDE.md) | Install, first build, Claude Code integration, querying, the full UI controls, Multiverse workflows, updating and uninstalling, troubleshooting. |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Components, the graph data model, the indexing pipeline, cache, search, report and wiki, the rendering pipeline, and the `viz/*.js` module graph. |
 | [docs/SERVICES.md](docs/SERVICES.md) | The Multiverse engine: HTTP API reference, job lifecycle, security model, launcher, registry and hooks lifecycle. |

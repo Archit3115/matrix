@@ -245,6 +245,8 @@ flowchart TD
   schema-qualified one becomes an `external` table node with an INFERRED edge.
 - **Self-loops are never stored.** Dangling edges are dropped before the graph is written.
 
+How an agent should act on each tier is covered in [FOR-AGENTS.md](FOR-AGENTS.md#provenance-as-epistemic-hygiene).
+
 ---
 
 ## Indexing pipeline
@@ -420,7 +422,8 @@ claims are multiplied by 0.6.
 | `wiki/<slug>.md` | One article per community: members grouped by type, highest degree first, each with `file:line` and up to 6 outgoing edges with their provenance | 60 nodes per type |
 
 The wiki folder is cleared of old `.md` files on every build. These files are meant to be read by people and by
-assistants, so neither has to parse JSON.
+assistants, so neither has to parse JSON. [FOR-AGENTS.md](FOR-AGENTS.md#context-budget-design) explains how they
+fit an agent's context budget.
 
 ---
 
