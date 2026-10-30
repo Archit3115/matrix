@@ -265,6 +265,19 @@ def main(argv=None):
         check(not parser.bad, "graph.html loads from the network: " + ", ".join(parser.bad[:5]))
         ok("graph.html exists and is offline (no remote src/href/url())")
 
+        sys.path.insert(0, mx)
+        import combine
+        pair = [("a", graph), ("b", graph)]
+        merged, names, link = combine.merge(pair)
+        shared = [e for e in merged["edges"] if e["rel"] == "SHARED"]
+        check(shared and link[0][1] == len(shared) and len(merged["nodes"]) == 2 * len(nodes),
+              f"combine: {len(shared)} SHARED edges, link {link}")
+        parser = Offline()
+        parser.feed(combine.render(pair))
+        parser.close()
+        check(not parser.bad, "combined page loads from the network: " + ", ".join(parser.bad[:5]))
+        ok(f"combine.py links two universes ({len(shared)} shared names) into one offline page")
+
         query = os.path.join(mx, "query.py")
         found = run([query, "find", "sales"], env)
         check("sales" in found.lower(), f"query.py find sales returned nothing:\n{found}")

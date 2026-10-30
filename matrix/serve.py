@@ -1004,6 +1004,9 @@ class Handler(BaseHTTPRequestHandler):
             return self.html(page("Matrix \u00b7 Multiverse", LEDE + list_html(ss, self.base)
                                   + "<section>" + ADD_HTML + "</section>" + PROGRESS_HTML,
                                   self.server_info(None), {"kind": "landing"}))
+        m = re.fullmatch(r"/c/([^/]+)/", path)
+        if m:
+            return self.combined(unquote(m.group(1)).split(","))
         m = re.fullmatch(r"/u/([^/]+)(/.*)?", path)
         if not m:
             raise HttpError(404, "no such page")
@@ -1043,6 +1046,20 @@ class Handler(BaseHTTPRequestHandler):
             text = fh.read()
         self.html(inject(text, self.server_info(s["id"]),
                          scopes.embed(s["id"], self.jobs.building(), strict=True)))
+
+    def combined(self, ids):
+        """/c/<id>,<id>[,...]/: two or more universes on one page (combine.py)."""
+        import combine
+        ids = list(dict.fromkeys(ids))
+        ss = [scopes.get(i) if ID_RE.fullmatch(i) else None for i in ids]
+        if len(ids) < 2 or None in ss:
+            raise HttpError(404, "combine needs two or more registered universes")
+        try:
+            universes, roots = combine.load(ss)
+        except ValueError as exc:
+            raise HttpError(404, f"cannot combine: {exc}")
+        self.html(inject(combine.render(universes, roots), self.server_info(None),
+                         scopes.embed(None, self.jobs.building(), strict=True)))
 
     def unbuilt(self, s):
         job, last = self.jobs.live_job(s["id"]), self.jobs.last_job(s["id"])
