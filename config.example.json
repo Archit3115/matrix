@@ -1,0 +1,22 @@
+{
+  "roots": ["/path/to/your/project"],
+  "memory": null,
+  "ignore_dirs": [
+    ".venv", "venv", "typings", "node_modules", ".git", "__pycache__",
+    ".mypy_cache", ".pytest_cache", ".ipynb_checkpoints", ".databricks",
+    ".vscode", "dist", "build", ".egg-info"
+  ],
+  "ignore_globs": ["*.min.js", "*.lock", "*.log"],
+  "ignore_paths": [],
+  "data_dirs": [],
+  "data_exts": [".csv", ".parquet", ".xlsx", ".xls", ".zip", ".7z", ".gz",
+                ".pptx", ".docx", ".bak", ".png", ".jpg", ".jpeg", ".gif",
+                ".webp", ".svg", ".pdf"],
+  "max_file_bytes": 2000000,
+  "adf_json": false,
+  "claims": true,
+  "out_dir": "out",
+  "title": "Matrix",
+  "max_files": 60000,
+  "embed_scopes": true
+}

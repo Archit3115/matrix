@@ -1,0 +1,78 @@
+# CI for every pull request (including from forks) and every push to main.
+# The job names below are the required status checks in
+# .github/rulesets/main-protection.json: rename a job and you must update the
+# ruleset too, or pull requests will wait forever for the old check.
+#
+# Security: this workflow runs on `pull_request` only (never
+# `pull_request_target`), so fork PRs get a read-only token and no secrets.
+# It uses no secrets at all.
+
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compile every Python file
+        run: python -m compileall -q matrix tests
+      - name: Syntax-check every JavaScript file
+        run: |
+          node --version
+          find matrix -name '*.js' -print0 | sort -z | xargs -0 -n1 node --check
+
+  test:
+    name: test (${{ matrix.os }}, py${{ matrix.python-version }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.10", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Smoke test
+        run: python tests/smoke.py
+
+  selftest:
+    name: selftest
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Page self-test in headless Chrome
+        run: |
+          export CHROME="$(command -v google-chrome || command -v google-chrome-stable)"
+          "$CHROME" --version
+          python tests/selftest.py --modes webgl,nogl

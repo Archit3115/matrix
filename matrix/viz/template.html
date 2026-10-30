@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>__MATRIX_TITLE__</title>
+<script>(function(d){var t="dark",a=null,h=/[#&]theme=(light|dark)(&|$)/.exec(location.hash);try{t=localStorage.getItem("mx.theme")==="light"?"light":"dark";a=localStorage.getItem("mx.anim")}catch(e){}if(h)t=h[1];d.setAttribute("data-theme",t);if(a==="0"||/[#&]anim=0(&|$)/.test(location.hash))d.setAttribute("data-anim","0")})(document.documentElement)</script>
+<style>
+/*__CSS__*/
+</style>
+</head>
+<body>
+<div id="wash" aria-hidden="true"></div>
+<a class="skip-link" id="skip" href="#panel">Skip to inspector</a>
+
+<header class="glass" data-overlay="top">
+  <span id="hl-mark" class="hl-mark"></span>
+  <h1>__MATRIX_TITLE__</h1>
+  <span class="meta" id="headline"></span><span class="spacer"></span>
+  <button id="reset" type="button">Reset view</button>
+  <button id="theme" type="button" aria-pressed="false">Dark</button>
+  <button id="anim" type="button" aria-pressed="true" aria-describedby="anim-hint">Motion</button>
+  <span id="anim-hint" class="sr-only">Orbits, twinkle and particles. The reduced-motion setting also stops motion.</span>
+  <button id="view3d" type="button" aria-pressed="true" aria-label="3D view" aria-describedby="view3d-hint">3D</button>
+  <span id="view3d-hint" class="sr-only">Pressed: tilted view with depth. Not pressed: face-on, flat 2D view. Key: v.</span>
+  <button id="mv-btn" type="button" aria-expanded="false" aria-controls="mv" aria-haspopup="dialog" title="Multiverse (u)" hidden><svg class="mv-ico" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="1.3"/><ellipse cx="8" cy="8" rx="6.5" ry="2.6"/><ellipse cx="8" cy="8" rx="2.6" ry="6.5"/></svg><span>Multiverse</span></button>
+  <button id="fullscreen" class="btn-ico" type="button" aria-pressed="false" aria-label="Full screen" title="Full screen (f)"><svg viewBox="0 0 16 16" aria-hidden="true"><path class="fs-out" d="M2.5 6V2.5H6M10 2.5h3.5V6M13.5 10v3.5H10M6 13.5H2.5V10"/><path class="fs-in" d="M6 2.5V6H2.5M13.5 6H10V2.5M10 13.5V10h3.5M2.5 10H6v3.5"/></svg></button>
+  <button id="help-btn" type="button" aria-expanded="false" aria-controls="help" hidden>Help</button>
+  <div id="help" class="popover glass-strong" role="dialog" aria-label="Keyboard help" hidden></div>
+</header>
+<div id="mv" class="mv" hidden></div>
+
+<aside id="side" class="glass side" aria-label="Views and filters">
+  <nav id="view" class="tabrail" role="tablist" aria-orientation="vertical" aria-label="Views">
+    <button type="button" role="tab" id="tab-graph" aria-controls="pane-graph" aria-selected="true" tabindex="0"><svg class="tab-ico" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="1.6"/><circle cx="8" cy="8" r="5.5"/><circle cx="13.5" cy="8" r=".9"/></svg><span>Graph</span></button>
+    <button type="button" role="tab" id="tab-overview" aria-controls="pane-overview" aria-selected="false" tabindex="-1"><svg class="tab-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 13.5h11M4.5 13.5V8.5M8 13.5V4.5M11.5 13.5V10.5"/></svg><span>Overview</span></button>
+    <button type="button" role="tab" id="tab-claims" aria-controls="pane-claims" aria-selected="false" tabindex="-1"><svg class="tab-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 4.5h10M3 8h10M3 11.5h6"/></svg><span>Claims</span></button>
+    <button type="button" role="tab" id="tab-communities" aria-controls="pane-communities" aria-selected="false" tabindex="-1"><svg class="tab-ico" viewBox="0 0 16 16" aria-hidden="true"><circle cx="5.5" cy="6" r="2.5"/><circle cx="10.5" cy="10" r="2.5"/><circle cx="11.5" cy="4" r="1.2"/></svg><span>Communities</span></button>
+    <button type="button" role="tab" id="tab-tables" aria-controls="tableview" aria-selected="false" tabindex="-1"><svg class="tab-ico" viewBox="0 0 16 16" aria-hidden="true"><rect x="2.5" y="3" width="11" height="10" rx="1.5"/><path d="M2.5 6.5h11M6.5 6.5V13"/></svg><span>Tables</span></button>
+  </nav>
+  <div id="filters" class="side-filters" role="region" aria-label="Filters">
+    <div id="f-search" class="facet-group">
+      <label class="sr-only" for="search">Search nodes</label>
+      <input id="search" type="search" placeholder="Search nodes…" autocomplete="off" aria-label="Search nodes">
+      <span id="results-count" class="meta"></span>
+      <ul id="results" class="glass-strong" role="listbox" aria-label="Search results" hidden></ul>
+    </div>
+    <div id="f-active" class="f-active" role="group" aria-labelledby="f-active-h" hidden>
+      <div class="f-active-head"><span id="f-active-h" class="sec-lbl">Active filters</span><span id="f-active-n" class="sec-n"></span>
+        <button id="reset-filters" class="btn-quiet" type="button" hidden>Clear</button></div>
+      <div id="f-active-chips"></div>
+    </div>
+    <p class="side-note">Filters narrow the graph and every tab.</p>
+    <div id="facets" class="side-scroll">
+      <div id="f-prov"></div><div id="f-group"></div><div id="f-rel"></div><div id="f-comm"></div>
+      <details id="f-degree" class="facet sec">
+        <summary><span class="sec-lbl">Degree</span><span class="sec-n"></span></summary>
+        <div class="deg-row">
+          <label for="mindeg">Min degree</label>
+          <output id="mindegv" for="mindeg" aria-live="off">0</output>
+        </div>
+        <input id="mindeg" type="range" min="0" max="50" step="1" value="0">
+        <div id="f-orphans"></div>
+      </details>
+    </div>
+  </div>
+  <details id="f-tools" class="facet sec tools">
+    <summary><span class="sec-lbl">Tools</span><span class="sec-n">layout · focus</span></summary>
+    <div class="tool-block">
+      <div class="deg-row">
+        <label for="spacing">Spacing</label>
+        <output id="spacingv" for="spacing" aria-live="off">1.0&times;</output>
+      </div>
+      <input id="spacing" type="range" min="0.5" max="3" step="0.1" value="1" aria-valuetext="spacing 1.0 times">
+      <button id="relayout" class="btn-quiet" type="button">Re-layout</button>
+    </div>
+    <div class="tool-block">
+      <p id="tool-state" class="meta"></p>
+      <div class="actions">
+        <button id="tool-focus1" type="button" disabled>Focus 1 hop</button>
+        <button id="tool-focus2" type="button" disabled>Focus 2 hops</button>
+        <button id="tool-path" type="button" disabled>Path to…</button>
+        <button id="tool-clear" type="button" disabled>Clear focus</button>
+      </div>
+    </div>
+  </details>
+</aside>
+<button id="grip-left" class="grip" type="button" data-side="left" aria-controls="side" aria-expanded="true" aria-label="Collapse sidebar" title="Collapse sidebar (Alt+[)"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M6.25 2 3.25 5l3 3"/></svg></button>
+<div id="rail-left" class="edge-rail" data-side="left">
+  <button id="expand-left" class="rail-btn" type="button" data-side="left" aria-controls="side" aria-expanded="false" aria-label="Expand sidebar" title="Expand sidebar (Alt+[)"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M3.75 2l3 3-3 3"/></svg></button>
+  <span class="rail-lbl" aria-hidden="true">Views · filters</span>
+</div>
+<div id="reserve-left" class="reserve" data-overlay="left" aria-hidden="true"></div>
+
+<main>
+  <section id="pane-graph" role="tabpanel" aria-labelledby="tab-graph">
+    <div id="stage">
+      <canvas id="cv-gl" aria-hidden="true"></canvas>
+      <canvas id="cv-back" aria-hidden="true"></canvas>
+      <canvas id="cv"></canvas>
+      <div id="zoom" class="glass" hidden>
+        <button id="zoom-in" type="button" aria-label="Zoom in">+</button>
+        <button id="zoom-out" type="button" aria-label="Zoom out">&minus;</button>
+        <button id="zoom-fit" type="button" aria-label="Fit graph">Fit</button>
+      </div>
+      <div id="hint" class="glass" data-overlay="bottom">drag to pan · scroll or ctrl-drag to zoom · double-click to fly in · ? help</div>
+      <div id="layout-status" class="meta"></div>
+      <div id="empty-msg" class="empty-msg" role="status" hidden></div>
+      <div id="hl-loading" class="hl-card" role="status" hidden>
+        <div class="hl-fig"></div>
+        <p class="hl-cap">Layout settling</p>
+        <span class="hl-read" aria-hidden="true"></span>
+      </div>
+    </div>
+  </section>
+  <section id="pane-overview" class="pane glass-strong" role="tabpanel" aria-labelledby="tab-overview" hidden>
+    <h2>Overview</h2>
+    <div id="ov-kpis" class="tiles"></div>
+    <div class="cards">
+      <div id="ov-types" class="card"></div><div id="ov-prov" class="card"></div>
+      <div id="ov-rels" class="card"></div><div id="ov-degree" class="card"></div>
+      <div id="ov-folders" class="card"></div><div id="ov-hubs" class="card"></div>
+      <div id="ov-build" class="card"></div>
+    </div>
+  </section>
+  <section id="pane-claims" class="pane glass-strong" role="tabpanel" aria-labelledby="tab-claims" hidden>
+    <h2>Claims</h2><div id="cl-tiers" class="tiles"></div><div id="cl-table" class="card"></div>
+  </section>
+  <section id="pane-communities" class="pane glass-strong" role="tabpanel" aria-labelledby="tab-communities" hidden>
+    <h2>Communities</h2><div id="cm-sizes" class="card"></div><div id="cm-table" class="card"></div>
+  </section>
+  <section id="tableview" class="pane glass-strong" role="tabpanel" aria-labelledby="tab-tables" hidden>
+    <h2>Tables</h2>
+    <div class="actions">
+      <span id="tb-switch" role="group" aria-label="Table">
+        <button id="tb-nodes" type="button" aria-pressed="true">Nodes</button>
+        <button id="tb-edges" type="button" aria-pressed="false">Edges</button>
+      </span>
+      <input id="tb-filter" type="search" aria-label="Filter rows" placeholder="Filter rows…">
+    </div>
+    <div id="tb-table"></div>
+  </section>
+</main>
+
+<aside id="panel" class="glass" tabindex="-1" aria-labelledby="panel-title">
+  <h2 id="panel-title">Nothing selected</h2>
+  <div class="sub">Click a node, or search the sidebar. Every relationship shows its
+    provenance — <em>extracted</em> is stated in the source, <em>inferred</em>
+    was resolved across files, <em>ambiguous</em> matched more than one
+    candidate.</div>
+</aside>
+
+<button id="grip-right" class="grip" type="button" data-side="right" aria-controls="panel" aria-expanded="true" aria-label="Collapse inspector" title="Collapse inspector (Alt+])"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M3.75 2l3 3-3 3"/></svg></button>
+<div id="rail-right" class="edge-rail" data-side="right">
+  <button id="expand-right" class="rail-btn" type="button" data-side="right" aria-controls="panel" aria-expanded="false" aria-label="Expand inspector" title="Expand inspector (Alt+])"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M6.25 2 3.25 5l3 3"/></svg></button>
+  <span class="rail-lbl" aria-hidden="true">Inspector</span>
+</div>
+<div id="reserve-right" class="reserve" data-overlay="right" aria-hidden="true"></div>
+<button id="fs-exit" class="btn-ico" type="button" aria-label="Exit full screen" title="Exit full screen (f or Esc)" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 2.5V6H2.5M13.5 6H10V2.5M10 13.5V10h3.5M2.5 10H6v3.5"/></svg></button>
+
+<div id="live" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+<output id="mxstatus" hidden></output>
+<span id="mx-probe" hidden></span>
+
+<script type="application/json" id="payload">__PAYLOAD__</script>
+<script>
+//__JS__
+</script>
+</body>
+</html>

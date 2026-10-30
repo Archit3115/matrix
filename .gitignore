@@ -1,0 +1,30 @@
+# generated graph output and caches
+out/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+build/
+dist/
+*.egg-info/
+
+# virtual environments
+.venv/
+venv/
+
+# setup.py backups and atomic-write temp files
+*.matrix-bak*
+*.matrix-tmp
+*.tmp
+
+# installed / local configs (config.example.json is the tracked template)
+config.json
+
+# local sandboxes and test homes
+sandbox/
+*_sandbox/
+.matrix_home/
+
+# OS files
+.DS_Store
+Thumbs.db

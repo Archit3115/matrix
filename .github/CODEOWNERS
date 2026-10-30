@@ -1,0 +1,9 @@
+# Every change needs a review from the maintainer (the ruleset requires a
+# code-owner review). Later, more specific lines win; they are listed so the
+# sensitive paths stay owned even if the catch-all line is ever changed.
+*           @Archit3115
+
+/.github/   @Archit3115
+/matrix/    @Archit3115
+/tests/     @Archit3115
+/LICENSE    @Archit3115

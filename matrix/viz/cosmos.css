@@ -1,0 +1,31 @@
+/* cosmos.css: the UI touches cosmos.js still drives (html.cosmos/.cosmos-still/.cz-warping, #cosmos-fx,
+   the #layout-status loader). Hairline chrome: no sheen, no prism rim, no glowing controls. */
+
+@media (forced-colors: active) { #cosmos-fx { display: none !important; } }
+.cz-probe { display: none; }
+/* warp streaks: above the graph, below the plates (chrome z >= 9) */
+#cosmos-fx { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+
+/* tab switch: the pane rises 6px and fades in on the lift curve, inside the warp window (<= 300 ms) */
+html.cz-warping .pane:not([hidden]), html.cz-warping #pane-graph:not([inert]) #cv {
+  animation: cz-arrive 280ms cubic-bezier(.32, .72, 0, 1) both;
+}
+@keyframes cz-arrive { 0% { opacity: 0; transform: translate3d(0, 6px, 0); } 100% { opacity: 1; transform: none; } }
+
+/* motion gates */
+html.cosmos-still .cz-orbit *, html[data-anim="0"] .cz-orbit * { animation-play-state: paused !important; }
+@media (prefers-reduced-motion: reduce) { .cz-orbit *, html.cz-warping .pane, html.cz-warping #cv { animation: none !important; } }
+
+#layout-status { background: var(--cosmos-scrim); border-radius: 8px; padding: 0 10px; box-shadow: inset 0 0 0 1px var(--ring); }
+#layout-status:empty { background: none; box-shadow: none; }
+
+/* loader: one hairline ring and one bright dot travelling it (no glow) */
+.cz-orbit { --cz-s: 14px; position: relative; display: inline-block; flex: 0 0 auto; width: var(--cz-s); height: var(--cz-s); vertical-align: middle; }
+.cz-orbit > i { position: absolute; inset: 0; border-radius: 50%; }
+.cz-orbit > .cz-sun { inset: 40%; background: var(--cosmos-sun); }
+.cz-orbit > .cz-ring { border: 1px solid var(--cosmos-orbit); animation: cz-spin 1.4s cubic-bezier(.32, .72, 0, 1) infinite; }
+.cz-orbit > .cz-ring.cz-r2 { display: none; }
+.cz-orbit > .cz-ring > b { position: absolute; top: -2.5px; left: calc(50% - 2px); width: 4px; height: 4px; border-radius: 50%; background: var(--cosmos-sun); }
+@keyframes cz-spin { to { transform: rotate(360deg); } }
+#layout-status .cz-orbit { order: -1; margin-right: 2px; }
+#layout-status:not(.cz-busy) .cz-orbit { display: none; }

@@ -1,0 +1,14 @@
+# Keeps the GitHub Actions used by .github/workflows up to date.
+# Matrix has no third-party Python or JavaScript dependencies to track.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "ci"
+    groups:
+      actions:
+        patterns:
+          - "*"
