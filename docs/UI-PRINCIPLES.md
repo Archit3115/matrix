@@ -420,7 +420,7 @@ springs back. Under reduced motion it lands at once.
 
 | Budget | Value | Enforced by |
 |---|---|---|
-| Embedded universe hierarchy | ≤ 120,000 bytes | A hard assert in `viz.py`. |
+| Embedded universe hierarchy | Warn above 120,000 bytes | `viz.py` |
 | Whole page | Warn above 3.8 MB | `viz.py` |
 | Frames | Drawn only when dirty or animating; U0 on a 30 fps timer | The `render.js` scheduler. |
 | Pixel ratio | Capped at 2 (the Canvas2D mesh at 1) | `render.js` |

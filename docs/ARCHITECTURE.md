@@ -468,7 +468,7 @@ flowchart TD
 
 **Guards and escaping:**
 
-- `universe` must serialise to 120,000 bytes or less (a hard assert).
+- A `universe` that serialises to more than 120,000 bytes prints a warning.
 - A page over 3.8 MB prints a warning.
 - The CSS and JS sources must not contain `</script`, `</style`, `<!--` or a placeholder string.
 - The registry block is escaped so that no `/` can recreate a placeholder.
